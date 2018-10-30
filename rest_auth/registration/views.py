@@ -101,10 +101,10 @@ class VerifyEmailView(APIView, ConfirmEmailView):
 
         if getattr(settings, 'REST_USE_JWT', False):
             token = jwt_encode(user)
-            data = {
+            data = JWTSerializer({
                 'user': user,
                 'token': token
-            }
+            }).data
         else:
             data = {
                 'detail': _('ok')
