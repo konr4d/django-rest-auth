@@ -93,9 +93,24 @@ class VerifyEmailView(APIView, ConfirmEmailView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.kwargs['key'] = serializer.validated_data['key']
+
         confirmation = self.get_object()
         confirmation.confirm(self.request)
-        return Response({'detail': _('ok')}, status=status.HTTP_200_OK)
+
+        user = confirmation.email_address.user
+
+        if getattr(settings, 'REST_USE_JWT', False):
+            token = jwt_encode(user)
+            data = {
+                'user': user,
+                'token': token
+            }
+        else:
+            data = {
+                'detail': _('ok')
+            }
+
+        return Response(data, status=status.HTTP_200_OK)
 
 
 class SocialLoginView(LoginView):
